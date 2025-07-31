@@ -251,7 +251,10 @@ This step supports core components of the stack:
 - Defined **outputs** to reference EC2 instance IDs and private IPs
 - **Included separate startup scripts (user data) for automated provisioning:**
   - `userdata_laravel.sh` Installs Apache, PHP, Composer, and Laravel, and sets up a **simple Laravel starter app** included in the project repo for quick testing.
+    > You can find the full project on [Laravel-Starter-APP-Repo](https://github.com/idokochukwudi/laravel-starter-app).
+
   - `userdata_nodejs.sh` Installs Node.js, npm, PM2, and runs a **simple Node.js** worker app also included in the project repo.
+    > For detailed steps on setting up Node.js used in this application, refer to the [Starter App Node.js REPO](https://github.com/idokochukwudi/node-worker-app).
 
 #### Simple apps included in the repo
 
