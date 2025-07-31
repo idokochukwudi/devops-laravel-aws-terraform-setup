@@ -86,7 +86,7 @@ terraform apply
 
 ![](./img/5.apply1.png)
 
-#### Console output
+### Console output
 
 ![](./img/6.keypair-provisioned.png)
 
@@ -251,17 +251,17 @@ This step supports core components of the stack:
 - Defined **outputs** to reference EC2 instance IDs and private IPs
 - **Included separate startup scripts (user data) for automated provisioning:**
   - `userdata_laravel.sh` Installs Apache, PHP, Composer, and Laravel, and sets up a **simple Laravel starter app** included in the project repo for quick testing.
-    > You can find the full project on [Laravel-Starter-APP-Repo](https://github.com/idokochukwudi/laravel-starter-app).
 
   - `userdata_nodejs.sh` Installs Node.js, npm, PM2, and runs a **simple Node.js** worker app also included in the project repo.
-    > For detailed steps on setting up Node.js used in this application, refer to the [Starter App Node.js REPO](https://github.com/idokochukwudi/node-worker-app).
 
 #### Simple apps included in the repo
 
 - **Laravel Starter App:** A minimal Laravel 10.x app with Livewire installed, ready to run and demonstrate core Laravel functionality.
+  > You can find the full project on [Laravel-Starter-APP-Repo](https://github.com/idokochukwudi/laravel-starter-app).
 - **Node.js Worker App:** A minimal Node.js script that logs a message every 10 seconds, demonstrating background task processing with PM2.
+  > For detailed steps on setting up Node.js used in this application, refer to the [Starter App Node.js REPO](https://github.com/idokochukwudi/node-worker-app).
 
-#### 📄 Additional Documentation
+### 📄 Additional Documentation
 
 - [Install Composer on Windows](./docs/install_composer_windows.md)
 - [Laravel App Setup Documentation](./docs/Laravel-App-Setup-documentation.md)
@@ -448,7 +448,7 @@ aws ec2 describe-instance-attribute \
 
 > The decoded script was correct and matched the expected content, confirming that user data was present but did not execute.
 
-#### Solution Documentation: Enabling User Data Execution on EC2 Instance in Private Subnet Using NAT Gateway (Terraform Module Approach)
+### Solution Documentation: Enabling User Data Execution on EC2 Instance in Private Subnet Using NAT Gateway (Terraform Module Approach)
 
 1. **Background and Problem Statement**
 
@@ -491,7 +491,7 @@ This route allows **all subnets inside your VPC to talk to each other** by routi
 - Confirm security groups allow outbound traffic (they already allow all outbound).
 - This allows the EC2 instance in the private subnet to run user data scripts successfully.
 
-#### Implementation Details
+### Implementation Details
 
 **NOTE:** First of all I also confirmed if Internet Gateway is already attached to my VPC
 
@@ -504,7 +504,7 @@ aws ec2 describe-internet-gateways \
 
 > From the output, the Internet Gateway is already attached to my VPC.
 
-1. **Update my Network Module `main.tf` with the following:**
+### 1. *Update my Network Module `main.tf` with the following:
 
 ```bash
 # Allocate Elastic IP for NAT Gateway
@@ -550,7 +550,7 @@ resource "aws_route_table_association" "private_subnet_assoc" {
 }
 ```
 
-2. **Update your Network Module variables (`variables.tf`):**
+### 2. Update your Network Module variables (`variables.tf`):
 
 ```bash
 variable "vpc_id" {
@@ -586,11 +586,11 @@ module "network" {
 }
 ```
 
-4. **Security Group Review**
+### 4. Security Group Review
 
 My existing security groups allow all outbound traffic and the necessary inbound traffic.
 
-5. **Post-Deployment Verification**
+### 5. Post-Deployment Verification
 Before applying the Terraform changes, I ran a clean-up to ensure the infrastructure would provision from scratch without conflicts or leftover resources:
 
 ```bash
@@ -610,7 +610,7 @@ Then, to deploy the updated infrastructure with the new NAT Gateway and related 
 
   ![](./img/35.clean-apply.png)
 
-#### Summary of Issues and Solutions Encountered
+### Summary of Issues and Solutions Encountered
 
 - **Error: Missing required argument "`vpc_id`" in network module**
 
@@ -635,7 +635,7 @@ Then, to deploy the updated infrastructure with the new NAT Gateway and related 
 
   **Solution:** Remove or update the argument to comply with the current AWS provider version documentation.
 
-  ### Post-NAT Gateway Verification & Application Bootstrapping (Laravel & NodeJS) via User Data
+### Post-NAT Gateway Verification & Application Bootstrapping (Laravel & NodeJS) via User Data
 
 #### Objective
 To confirm that, after provisioning a **NAT Gateway** and updating the **route table**, the EC2 instances in **private subnets** now:
@@ -655,9 +655,9 @@ From previous deployment fixes:
   - SSH from Bastion to private EC2s.
   - All outbound traffic for internet access.
 
-#### Validation of Laravel and NodeJS App 
+### Validation of Laravel and NodeJS App 
 
-1. SSH Access into Bastion Host (Public Subnet)
+#### 1. SSH Access into Bastion Host (Public Subnet)
 On your local machine:
 
 ```bash
@@ -668,14 +668,14 @@ ssh -i ~/.ssh/laravel-key.pem ec2-user@<BASTION_PUBLIC_IP>
 
 > **Success:** I'am now in the Bastion Host.
 
-2. SSH Access from Bastion → Laravel EC2 (Private Subnet)
+#### 2. SSH Access from Bastion → Laravel EC2 (Private Subnet)
 
 ```bash
 ssh -i ~/.ssh/laravel-key ec2-user@<LARAVEL_PRIVATE_IP>
 ```
 
 - You will get a fingerprint prompt on first connection — accept it.
-- If permission denied:
+- **If permission denied:**
   - Ensure the key file has chmod 400
   - Confirm correct ec2-user (Amazon Linux), or use ubuntu (Ubuntu OS)
 
@@ -683,9 +683,9 @@ ssh -i ~/.ssh/laravel-key ec2-user@<LARAVEL_PRIVATE_IP>
 
   > **Success:** I'm now inside the Laravel EC2 instance.
 
-#### Validate Laravel App Setup from User Data
+### Validate Laravel App Setup from User Data
 
-1. Check if user data log exists:
+#### 1. Check if user data log exists:
 
 ```bash
 sudo cat /var/log/cloud-init-output.log
@@ -700,7 +700,7 @@ Generating application key...
 Restarting apache2...
 ```
 
-2. Confirm Apache is running:
+#### 2. Confirm Apache is running:
 
 ```bash
 sudo systemctl status apache2
@@ -708,9 +708,9 @@ sudo systemctl status apache2
 
 ---
 
-### Laravel UserData Installation Failure & Manual Installation Recovery
+## Laravel UserData Installation Failure & Manual Installation Recovery
 
-#### Background
+### Background
 During the provisioning of a Laravel application on a private **EC2 instance** (reachable only via a **Bastion Host**), the initial plan was to automate the Laravel installation using the **EC2 user data script**. This script was intended to:
 
 - Update the server
@@ -720,10 +720,10 @@ During the provisioning of a Laravel application on a private **EC2 instance** (
 - Set proper permissions and environment variables
 - Configure NGINX
 
-#### ❌ Problem Encountered: UserData Script Not Installing Laravel
+### ❌ Problem Encountered: UserData Script Not Installing Laravel
 Despite the user data script being attached correctly to the EC2 Launch Template, Laravel did not install properly. The web server returned a blank page or NGINX default index, and Laravel-specific files (e.g., .env, vendor/, etc.) were missing.
 
-#### Summary of Troubleshooting Attempts
+### Summary of Troubleshooting Attempts
 
 - Verified that user data was base64-encoded and correctly attached in the Terraform configuration.
 - Confirmed the GitHub repository containing the Laravel Starter App (which I personally created) was public and could be cloned without requiring SSH keys.
@@ -747,9 +747,9 @@ Despite the user data script being attached correctly to the EC2 Launch Template
 #### Manual Installation:  (Inside the Instance)
 After repeated failure using automation, the decision was made to manually SSH into the instance through the Bastion Host and run a script to set up Laravel successfully.
 
-#### Access via Bastion Host
+## Access via Bastion Host
 
-#### Step 1: Create the Script
+### Step 1: Create the Script
 SSH into the private instance through the Bastion, then:
 
 ```bash
@@ -758,7 +758,7 @@ ssh -i private-instance-key.pem ec2-user@<private-instance-private-ip>
 ```
 ![](./img/38.ssh-into-laravel-server.png)
 
-#### Manual Setup Script: `install_laravel.sh`
+### Manual Setup Script: `install_laravel.sh`
 
 ```bash
 nano install_laravel.sh
@@ -842,41 +842,43 @@ sudo systemctl restart nginx
 echo "Laravel app deployed successfully on Amazon Linux 2 with NGINX!"
 ```
 
- #### Step 2: Make It Executable
+ ### Step 2: Make It Executable
 
  ```bash
  chmod +x install_laravel.sh
  ```
-#### Step 3: Run It
+### Step 3: Run It
 
 ```bash
 ./install_laravel.sh
 ```
 ----
-#### Summary of Laravel Setup on Amazon Linux 2023 EC2 Instance
 
-##### Initial Setup & Automation
+## Summary of Laravel Setup on Amazon Linux 2023 EC2 Instance
+
+### Initial Setup & Automation
 - Provisioned an Amazon Linux 2023 EC2 instance.
 - Created a bash installation script (`install_laravel.sh`) to automate setup of required software:
   - System update, installation of Nginx, PHP 8.4 with necessary extensions, MariaDB connector, Git, and Composer.
   - Enabled and started Nginx and PHP-FPM services.
   - Installed Composer globally for PHP package management.
   - Cloned Laravel starter app from GitHub into /var/www/laravel-app.
-#### Challenges Encountered and Solutions
+  
+## Challenges Encountered and Solutions
 
-##### Package Installation Issues:
+### Package Installation Issues:
 - `mysql` and `mariadb` packages were not found in Amazon Linux 2023 repositories.
 **Solution:** Replaced with `mariadb-connector-c` which provides the necessary client libraries compatible with Laravel.
 
-##### Permission Denied Errors for .env file:
+### Permission Denied Errors for .env file:
 - Running `php artisan key:generate` failed with `file_put_contents():` Permission denied on `.env.`
 **Solution:** Explicitly changed ownership of `.env` to apache user and set writable permissions before generating the app key.
 
-##### Git Clone Fails When Directory Exists:
+### Git Clone Fails When Directory Exists:
 - The clone step failed because `/var/www/laravel-app` already existed from previous runs.
 **Solution:** Added a cleanup command to remove any existing `laravel-app` directory before cloning.
 
-##### Final Steps
+### Final Steps
 - Set directory permissions and ownership properly for the apache user to ensure the web server and Laravel can read/write necessary files and directories.
 - Configured Nginx to serve the Laravel app from the public directory and linked PHP-FPM socket.
 - Restarted services to apply configuration.
@@ -885,7 +887,8 @@ echo "Laravel app deployed successfully on Amazon Linux 2 with NGINX!"
 ![](./img/39.laravel-install-successful.png)
 
 ---
-### Node.js Installation (Amazon Linux)
+
+## Node.js Installation (Amazon Linux)
 
 For full documentation on how Node.js was installed using a script (`install_nodejs.sh`), including the problem encountered with the `UserData` method and the manual recovery steps, click the link below:
 
@@ -894,7 +897,8 @@ For full documentation on how Node.js was installed using a script (`install_nod
 ![](./img/40.nodejs-install-successful.png)
 
 ---
-### User Data Script Update and Validation (Amazon Linux 2023)
+
+## User Data Script Update and Validation (Amazon Linux 2023)
 
 After manually troubleshooting and successfully installing Laravel on the EC2 instance, I identified and resolved issues in the original user_data script. The updated script incorporated several necessary corrections, including:
 
@@ -903,14 +907,14 @@ After manually troubleshooting and successfully installing Laravel on the EC2 in
 - Accurate configuration for nginx with PHP-FPM socket
 - Use of apache user for Composer and Artisan commands
 
-#### Updated User Data Script
+### Updated User Data Script
 The corrected `userdata_laravel.sh` script was added to the user_data field in the Terraform EC2 configuration.
 
 To reflect this, I replaced the old user data in the Terraform EC2 resource with the updated script:
 
 > The script used is available at: `userdata/install_laravel.sh`
 
-#### Reapplying Terraform
+### Reapplying Terraform
 
 After replacing the broken user data with the updated version, I ran:
 
@@ -919,15 +923,15 @@ terraform apply
 ```
 > This **successfully reprovisioned** the EC2 instance using the new user_data without any manual intervention.
 
-#### Confirming Laravel Application and Services
+### Confirming Laravel Application and Services
 
 After provisioning, I SSHed into the instance and ran the following commands to verify Laravel was installed correctly via the script:
 
 ![](./img/41.ssh-to-laravel.png)
 
-**1. Confirm Nginx and PHP-FPM Services**
+### 1. Confirm Nginx and PHP-FPM Services
 
-- ##### sudo systemctl status nginx
+- #### sudo systemctl status nginx
 
   ![](./img/42.nginx-successful.png)
 
@@ -935,21 +939,21 @@ After provisioning, I SSHed into the instance and ran the following commands to 
 
   ![](./img/44.php-successful.png)
 
-#### 2. Check Nginx Configuration
+### 2. Check Nginx Configuration
 
 ```bash
 sudo nginx -t
 ```
 ![](./img/45.nginx-status.png)
 
-#### 3. Curl Application (from inside EC2)
+### 3. Curl Application (from inside EC2)
 
 ```bash
 curl http://localhost
 ```
 ![](./img/46.nginx-localhost.png)
 
-#### Reference to Updated `Node.js` Installation Documentation
+## Reference to Updated `Node.js` Installation Documentation
 After replacing the original user data script with the updated script derived from the successful manual installation process, the Node.js environment was provisioned correctly and the application started without issues.
 
 For detailed steps and further reference, please consult the Node.js installation and setup documentation available here:
@@ -957,7 +961,7 @@ For detailed steps and further reference, please consult the Node.js installatio
 
 
 
-### Outcome
+## Outcome
 The **Laravel application** was successfully installed and running using only user data, eliminating the need for manual setup.
 
 Similarly, the **Node.js server** was deployed and verified using an updated user data script adapted from the manual installation approach, confirming its effectiveness for automating Node.js application provisioning.
