@@ -1,56 +1,74 @@
 #!/bin/bash
-# Node.js Worker EC2 Setup Script for Amazon Linux 2023
 
+# Enable logging to /var/log/install.log
+exec > /var/log/install.log 2>&1
 set -e
 
-# Update system and install required packages
-dnf update -y
-dnf install -y git nginx
+echo "Updating system packages..."
+sudo dnf update -y
 
-# Install Node.js 18
-curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
-dnf install -y nodejs
+echo "Removing conflicting curl-minimal package if exists..."
+sudo dnf remove -y curl-minimal || true
 
-# Create app directory and clone app
-APP_DIR="/home/ec2-user/node-worker"
-if [ ! -d "$APP_DIR" ]; then
-  git clone https://github.com/idokochukwudi/node-worker-app.git $APP_DIR
-fi
+echo "Installing curl with allowerasing to fix conflicts..."
+sudo dnf install -y curl --allowerasing
 
-# Change ownership
-chown -R ec2-user:ec2-user $APP_DIR
-cd $APP_DIR
+echo "Installing nginx with allowerasing..."
+sudo dnf install -y nginx --allowerasing
 
-# Install app dependencies
-sudo -u ec2-user npm install
+echo "Starting and enabling nginx service..."
+sudo systemctl start nginx
+sudo systemctl enable nginx
 
-# Install PM2 globally
-npm install -g pm2
+echo "Installing Node.js 18.x and build tools..."
+curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -
+sudo dnf install -y nodejs gcc-c++ make
 
-# Start app with PM2
-sudo -u ec2-user pm2 start index.js --name node-worker
-sudo -u ec2-user pm2 save
-sudo -u ec2-user pm2 startup systemd -u ec2-user --hp /home/ec2-user
+echo "Installing PM2 globally..."
+sudo npm install -g pm2
 
-# Set up Nginx reverse proxy
-cat <<EOF > /etc/nginx/conf.d/node-worker.conf
-server {
-    listen 80;
-    server_name localhost;
+APP_DIR="/home/ec2-user/node-app"
+echo "Creating application directory at $APP_DIR..."
+mkdir -p "$APP_DIR"
+cd "$APP_DIR"
 
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_cache_bypass \$http_upgrade;
-    }
-}
+echo "Initializing Node.js project..."
+npm init -y
+
+echo "Installing Express.js..."
+npm install express
+
+echo "Creating index.js for node-worker..."
+cat <<EOF > index.js
+setInterval(() => {
+  console.log(\`Node Worker: Task running at \${new Date().toISOString()}\`);
+}, 5000);
 EOF
 
-# Remove default site and restart Nginx
-rm -f /etc/nginx/conf.d/default.conf
-nginx -t && systemctl enable nginx && systemctl restart nginx
+echo "Creating server.js for node-server (port 3000)..."
+cat <<EOF > server.js
+const express = require('express');
+const app = express();
+const port = 3000;
 
-echo "✅ Node.js worker with Nginx reverse proxy setup complete."
+app.get('/', (req, res) => {
+  res.send('Hello from Node.js server on port 3000!');
+});
+
+app.listen(port, () => {
+  console.log(\`Node.js server is listening on port \${port}\`);
+});
+EOF
+
+echo "Changing ownership of application directory..."
+sudo chown -R ec2-user:ec2-user "$APP_DIR"
+
+echo "Starting PM2 processes..."
+pm2 start index.js --name node-worker
+pm2 start server.js --name node-server
+
+echo "Saving PM2 process list and enabling startup on boot..."
+pm2 save
+pm2 startup systemd -u ec2-user --hp /home/ec2-user
+
+echo "Installation and setup complete!"

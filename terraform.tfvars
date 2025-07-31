@@ -8,7 +8,7 @@ availability_zones   = ["us-east-1a", "us-east-1b"]
 project              = "devops-laravel-node-app"
 
 # SECURITY GROUP 
-bastion_cidr = ["197.211.57.13/32"]
+bastion_cidr = ["197.211.63.104/32"]
 
 # EC2 for Web App
 ami_id        = "ami-08a6efd148b1f7504"

@@ -348,8 +348,6 @@ terraform apply -auto-approve
 - From Bastion, SSH into your **App EC2 Instances** (private subnet).
 - Verify that the user **data script** executed correctly **only on the App EC2 instances**.
 
-
-
 #### Step 1 – Locate and Secure Your Private Key
 
 Ensure my private key file exists and has proper permissions:
@@ -891,6 +889,77 @@ For full documentation on how Node.js was installed using a script (`install_nod
 ➡️ [Install Node.js on Amazon Linux](./docs/NodeJS_Installation_Documentation.md)
 
 ![](./img/40.nodejs-install-successful.png)
+
+---
+### User Data Script Update and Validation (Amazon Linux 2023)
+
+After manually troubleshooting and successfully installing Laravel on the EC2 instance, I identified and resolved issues in the original user_data script. The updated script incorporated several necessary corrections, including:
+
+- Ensuring correct package installation with --allowerasing
+- Proper service enablement and permissions for Laravel directories
+- Accurate configuration for nginx with PHP-FPM socket
+- Use of apache user for Composer and Artisan commands
+
+#### Updated User Data Script
+The corrected `userdata_laravel.sh` script was added to the user_data field in the Terraform EC2 configuration.
+
+To reflect this, I replaced the old user data in the Terraform EC2 resource with the updated script:
+
+> The script used is available at: `userdata/install_laravel.sh`
+
+#### Reapplying Terraform
+
+After replacing the broken user data with the updated version, I ran:
+
+```bash
+terraform apply
+```
+> This **successfully reprovisioned** the EC2 instance using the new user_data without any manual intervention.
+
+#### Confirming Laravel Application and Services
+
+After provisioning, I SSHed into the instance and ran the following commands to verify Laravel was installed correctly via the script:
+
+![](./img/41.ssh-to-laravel.png)
+
+**1. Confirm Nginx and PHP-FPM Services**
+
+- ##### sudo systemctl status nginx
+
+  ![](./img/42.nginx-successful.png)
+
+- #### sudo systemctl status php-fpm
+
+  ![](./img/44.php-successful.png)
+
+#### 2. Check Nginx Configuration
+
+```bash
+sudo nginx -t
+```
+![](./img/45.nginx-status.png)
+
+#### 3. Curl Application (from inside EC2)
+
+```bash
+curl http://localhost
+```
+![](./img/46.nginx-localhost.png)
+
+#### Reference to Updated `Node.js` Installation Documentation
+After replacing the original user data script with the updated script derived from the successful manual installation process, the Node.js environment was provisioned correctly and the application started without issues.
+
+For detailed steps and further reference, please consult the Node.js installation and setup documentation available here:
+[Node.js Installation Guide Using User Data Script](./docs/NODEJS_UserData_Script_Update_and_Validation.md)
+
+
+
+### Outcome
+The **Laravel application** was successfully installed and running using only user data, eliminating the need for manual setup.
+
+Similarly, the **Node.js server** was deployed and verified using an updated user data script adapted from the manual installation approach, confirming its effectiveness for automating Node.js application provisioning.
+
+This experience helped validate both the `userdata_laravel.sh` and the `userdata_nodejs.sh` user data scripts, revealing critical troubleshooting insights that significantly improved the reliability and consistency of the automated provisioning process.
 
 
 
