@@ -264,8 +264,6 @@ This step supports core components of the stack:
 ### 📄 Additional Documentation
 
 - [Install Composer on Windows](./docs/install_composer_windows.md)
-- [Laravel App Setup Documentation](./docs/Laravel-App-Setup-documentation.md)
-- [Node.js App Setup Documentation](./docs/NodeJS-App-Setup-documentation.md)
 
 #### CLI Commands
 
