@@ -345,11 +345,11 @@ terraform apply -auto-approve
 ### Step 7 – SSH Access and Verifying App Server Setup
 
 #### Purpose
-- SSH into the **Bastion Host** (which has a public IP) using your `.pem` private key.
-- From Bastion, SSH into your **App EC2 Instances** (private subnet).
+- SSH into the **Bastion Host** (which has a public IP) using my `.pem` private key.
+- From Bastion, SSH into my **App EC2 Instances** (private subnet).
 - Verify that the user **data script** executed correctly **only on the App EC2 instances**.
 
-#### Step 1 – Locate and Secure Your Private Key
+#### Step 1 – Locate and Secure my Private Key
 
 Ensure my private key file exists and has proper permissions:
 
@@ -392,7 +392,7 @@ Then, from inside the Bastion Host:
 chmod 400 ~/.ssh/laravel-key
 ssh -i ~/.ssh/laravel-key ec2-user@<PRIVATE_APP_IP>
 ```
-> Replace <PRIVATE_APP_IP> with the private IP of your App server (from AWS Console or Terraform output).
+> Replace <PRIVATE_APP_IP> with the private IP of my App server (from AWS Console or Terraform output).
 
 ![](./img/31.inside-laravel-instance-server.png)
 
@@ -479,7 +479,7 @@ aws ec2 describe-route-tables --filters "Name=vpc-id,Values=vpc-xxxxxxx" --query
 
 > Result: Only local routes (10.0.0.0/16 → local), no internet gateway or NAT gateway routes for private subnet.
 
-This route allows **all subnets inside your VPC to talk to each other** by routing traffic within the VPC, without needing to go through an internet gateway or NAT device.
+This route allows **all subnets inside my VPC to talk to each other** by routing traffic within the VPC, without needing to go through an internet gateway or NAT device.
 
 ### 3. Solution Overview
 
@@ -495,14 +495,14 @@ This route allows **all subnets inside your VPC to talk to each other** by routi
 
 ```bash
 aws ec2 describe-internet-gateways \
-  --filters "Name=attachment.vpc-id,Values=<your-vpc-id>"
+  --filters "Name=attachment.vpc-id,Values=<my-vpc-id>"
 ```
 
 ![](./img/34.ig-confirmed.png)
 
 > From the output, the Internet Gateway is already attached to my VPC.
 
-### 1. *Update my Network Module `main.tf` with the following:
+### 1. Update my Network Module `main.tf` with the following:
 
 ```bash
 # Allocate Elastic IP for NAT Gateway
@@ -548,7 +548,7 @@ resource "aws_route_table_association" "private_subnet_assoc" {
 }
 ```
 
-### 2. Update your Network Module variables (`variables.tf`):
+### 2. Update my Network Module variables (`variables.tf`):
 
 ```bash
 variable "vpc_id" {
@@ -656,7 +656,7 @@ From previous deployment fixes:
 ## Validation of Laravel and NodeJS App 
 
 ### 1. SSH Access into Bastion Host (Public Subnet)
-On your local machine:
+On my local machine:
 
 ```bash
 ssh -i ~/.ssh/laravel-key.pem ec2-user@<BASTION_PUBLIC_IP>
